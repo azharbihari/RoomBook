@@ -22,10 +22,6 @@ wheels/
 *.egg-info/
 *.egg
 
-# Flask specific
-instance/
-*.db
-*.sqlite3
 
 # Environments
 .env/
