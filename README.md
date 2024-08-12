@@ -25,7 +25,7 @@ Here's a quick look at the app:
 
 ![Booking Selection](screenshots/3.png)
 
-![Booking Confirmation](screenshots/4.png)
+![Booking Confirmation](screenshots/4.png) 
 
 ## Technologies Used
 
@@ -59,6 +59,10 @@ Here's a quick look at the app:
      ```bash
      pip install -r requirements.txt
      ```
+     - **Add Room Data Fixtures (Run Once):**
+     ```bash
+     python add_fixtures.py 
+     ```
    - **Run the Flask app:**
      ```bash
      flask run 
@@ -87,17 +91,39 @@ Here's a quick look at the app:
 
 - **GET /api/rooms**
    - Get a list of all rooms, including their availability for the current day in the Asia/Kolkata timezone.
-   - Optional query parameter: `q` (search query for room name).
+   - **Optional Query Parameter:** `q` (search query for room name).
+   - **Example Request:** `GET /api/rooms?q=Conference`
+   - **Example Response (JSON):**
+     ```json
+     [
+       {
+         "id": 1,
+         "name": "Conference Room A",
+         "capacity": 10,
+         "projector": true,
+         "sound": true,
+         "availability": [
+           { "startTime": "09:00", "endTime": "10:00", "available": true },
+           // ... more availability slots
+         ] 
+       },
+       // ... more rooms
+     ]
+     ``` 
 - **GET /api/rooms/:id**
     - Get details of a specific room by its ID. 
+    - **Example Request:** `GET /api/rooms/1`
+    - **Example Response (JSON):** (Similar to the room object in the previous response)
 - **GET /api/rooms/:id/availability/:date**
     - Get available time slots for a room on a specific date (date format: YYYY-MM-DD). 
+    - **Example Request:** `GET /api/rooms/1/availability/2024-01-20`
+    - **Example Response (JSON):** (Similar to the `availability` array in the first response)
 
 **Bookings:**
 
 - **POST /api/bookings**
-    - Create a new booking. Returns a success message and the unique booking code.
-    - Request body (JSON):
+    - Creates a new booking. 
+    - **Request Body (JSON):**
       ```json
       {
         "roomId": 1, 
@@ -105,11 +131,40 @@ Here's a quick look at the app:
         "endTime": "2024-01-15T11:00:00.000Z" 
       }
       ```
-      **Important:** The `startTime` and `endTime` should be in UTC as indicated by the `Z` at the end.
+    - **Response Body (JSON) - Success (201 Created):**
+       ```json
+       {
+         "message": "Booking successful!",
+         "bookingCode": "uuid-goes-here" 
+       }
+       ```
+    - **Response Body (JSON) - Error (e.g., 400 Bad Request):**
+       ```json
+       {
+         "error": "Invalid time slot. The room is already booked." 
+       }
+       ``` 
 
 ## Database
 
 This app uses an SQLite database (`bookings.db` in the backend directory) to store room and booking information. The database is created automatically when the Flask app runs for the first time. 
+
+**Adding Room Data:**
+
+- The file `add_fixtures.py` provides a way to populate your database with initial room data. Run it once using:
+    ```bash
+    python add_fixtures.py
+    ```
+
+## Testing
+
+**Backend Tests (unittest):**
+
+- Make sure you have your virtual environment activated.
+- Run tests from your `backend` directory using:
+   ```bash
+   python test_app.py
+  ```
 
 ## Future Improvements
 
