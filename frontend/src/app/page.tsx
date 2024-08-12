@@ -65,11 +65,10 @@ export default function Home() {
               Sound System: {room.sound ? "Yes" : "No"}
             </p>
             <div className="mt-4">
-              <h3 className="text-md font-semibold text-gray-700">Available Slots:</h3>
               {room.available_slots && room.available_slots.length > 0 ? (
-                <p className="text-green-500">Available</p>
+                <p className="text-green-500">Available for Today.</p>
               ) : (
-                <p className="text-red-500">Not Available</p>
+                <p className="text-red-500">Not Available for Today.</p>
               )}
             </div>
           </li>

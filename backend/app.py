@@ -113,6 +113,7 @@ def get_availability(room_id, date_str):
 
     return jsonify({'available_slots': available_slots})
 
+
 @app.route('/api/bookings', methods=['POST'])
 def create_booking():
     data = request.get_json()
@@ -125,6 +126,18 @@ def create_booking():
     local_tz = pytz.timezone('Asia/Kolkata')
     local_start_time = utc_start_time.replace(tzinfo=pytz.utc).astimezone(local_tz).replace(tzinfo=None)
     local_end_time = utc_end_time.replace(tzinfo=pytz.utc).astimezone(local_tz).replace(tzinfo=None)
+
+    # Check for conflicts
+    conflicts = Booking.query.filter(
+        Booking.room_id == data['roomId'],
+        Booking.start_time < local_end_time,
+        Booking.end_time > local_start_time
+    ).first()
+
+    if conflicts:
+        return jsonify({
+            'message': 'Booking conflict! Another booking overlaps with the requested time.'
+        }), 400
 
     # Create a new booking with the local times
     unique_code = str(uuid.uuid4())  # Generate a unique code for the booking
@@ -142,6 +155,7 @@ def create_booking():
         'message': f'Booking successful! Access your booked room with this code: {unique_code}',
         'code': unique_code
     }), 201
+
 
 if __name__ == '__main__':
     app.run(debug=True)

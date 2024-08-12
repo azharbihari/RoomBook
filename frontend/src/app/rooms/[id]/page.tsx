@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -22,7 +22,9 @@ export default function RoomDetails({
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(''); 
   const [availableSlots, setAvailableSlots] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [bookingCode, setBookingCode] = useState('');  // State for booking code
+  const [bookingCode, setBookingCode] = useState('');  
+  const [showBookingCode, setShowBookingCode] = useState(false); 
+  const [countdown, setCountdown] = useState(0);
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -30,7 +32,6 @@ export default function RoomDetails({
       try {
         const response = await axios.get(`http://127.0.0.1:5000/api/rooms/${id}`);
         setRoom(response.data);
-        console.log(response.data)
       } catch (error) {
         console.error('Error fetching room details:', error);
       }
@@ -83,10 +84,24 @@ export default function RoomDetails({
         endTime: endTime.toISOString(),
       });
 
-      console.log('Booking successful:', response.data); 
-      setBookingCode(response.data.code);  // Save the booking code
+      setBookingCode(response.data.code);
+      setShowBookingCode(true);
+      setCountdown(10);
+
       setSelectedTimeSlot(''); 
       fetchAvailability(); 
+
+      // Countdown logic
+      const countdownInterval = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval);
+            setShowBookingCode(false); // Hide the booking code after countdown
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
     } catch (error) {
       console.error('Error creating booking:', error);
@@ -154,11 +169,11 @@ export default function RoomDetails({
             </div>
           )}
 
-          {bookingCode && (
+          {showBookingCode && (
             <div className="mt-4 p-4 bg-green-100 text-green-700 rounded">
               <p className="font-semibold">Booking successful!</p>
               <p>Your booking code: <span className="font-bold">{bookingCode}</span></p>
-              <p>Use this code to access your booked room.</p>
+              <p>Please take a screenshot or note down this code. It will disappear in {countdown} seconds.</p>
             </div>
           )}
         </div>
